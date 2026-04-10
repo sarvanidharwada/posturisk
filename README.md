@@ -144,9 +144,12 @@ After creating your virtual environment and activating it, run these 5 modular s
 
 ```bash
 # 1. Install all frozen dependencies
+# Note: We deliberately use pure-python implementations like 'treeinterpreter' 
+# to ensure 100% cross-architecture compatibility for Apple Silicon / Windows Parallels users!
 pip install -r requirements.txt
 
-# 2. Download the PhysioNet Dataset (Lightweight metadata fetch)
+# 2. Download the PhysioNet Dataset 
+# WARNING: This pulls raw PhysioNet waveforms and requires up to 20GB of disk space/bandwidth!
 python -m posturisk.fetch_data
 
 # 3. Clean records and engineer 129 biomechanical features
