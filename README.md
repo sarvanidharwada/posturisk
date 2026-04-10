@@ -115,14 +115,17 @@ The project is structured incrementally natively through modular `.py` scripts a
    * Cleans clinical metadata (median imputations and missing logic drops). 
    * Engineers **129** distinct gait features (jerk profiles, spectral bandwidth distribution, and postural sway planar approximations).
    * Runs natively using `python -m posturisk.preprocess`.
-3. **Stage 4: Modelling (Pending)** 
-   * Train and compare Random Forest, Gradient Boosting, SVM, and Logistic Regression with nested cross-validation.
+3. **Stage 4: Modelling (`train.py`)** 
+   * Tunes and compares Random Forest and Support Vector Machine (RBF kernel) utilizing `RepeatedStratifiedKFold` cross-validation (5 splits, 3 repeats).
+   * Validates generalized metrics on a small sample size ($n=73$) avoiding leakage, outputting rigorous Sensitivity, Specificity, Accuracy, F1, and AUC metrics.
+   * Auto-pickles the champion model framework to `models/best_model.pkl`.
 4. **Stage 5: Explainability (Pending)** 
    * Generate SHAP summary plots, dependence plots, and per-subject force plots to interpret model decisions.
 
 ### 📓 Notebooks
 * `notebooks/01_eda.ipynb` — Explores the clinical demographics, visualizes the raw waveform signatures for Fallers vs. Non-Fallers.
 * `notebooks/02_features.ipynb` — Interactive visual deep dives into advanced feature correlations and engineered differences.
+* `notebooks/03_model_evaluation.ipynb` — Comprehensive summary tables, confusion matrices, and ROC curves evaluating the Random Forest vs SVM classifiers.
 
 ---
 
