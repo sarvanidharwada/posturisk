@@ -73,31 +73,57 @@ _FL_IDS = [
 ]
 
 
-def _build_file_list(include_3day: bool = True) -> list[str]:
+def _build_file_list(
+    include_3day: bool = True,
+    output_dir: Path = DEFAULT_OUTPUT_DIR,
+) -> list[str]:
     """Return the list of remote file paths to download.
+
+    Reads the RECORDS file (if already downloaded) to get correct names.
+    Falls back to hardcoded lists otherwise.
 
     Parameters
     ----------
     include_3day : bool
         If True, include the large 3-day free-living recordings.
         If False, only metadata and lab-walk files are included.
+    output_dir : Path
+        Local output directory (checked for an existing RECORDS file).
     """
     files: list[str] = list(METADATA_FILES)
 
-    # Lab-walk files (always included — they live in the LabWalks/ subdirectory)
-    for prefix, ids in [("CO", _CO_IDS), ("FL", _FL_IDS)]:
-        for sid in ids:
-            files.append(f"LabWalks/{prefix}{sid}.dat")
-            files.append(f"LabWalks/{prefix}{sid}.hea")
+    # Try to read the RECORDS file for accurate names
+    records_path = output_dir / "RECORDS"
+    if records_path.exists():
+        all_records = records_path.read_text().strip().splitlines()
+        lab_records = [r for r in all_records if r.startswith("LabWalks/")]
+        day3_records = [r for r in all_records if not r.startswith("LabWalks/")]
 
-    if include_3day:
-        for prefix, ids in [("CO", _CO_IDS), ("FL", _FL_IDS)]:
+        for rec in lab_records:
+            files.append(f"{rec}.dat")
+            files.append(f"{rec}.hea")
+
+        if include_3day:
+            for rec in day3_records:
+                files.append(f"{rec}.dat")
+                files.append(f"{rec}.hea")
+            # Supplemental segment files
+            for extra in ["CO028_n.dat", "CO029_n.dat", "CO038_2.dat"]:
+                files.append(extra)
+    else:
+        # Fallback: hardcoded lab-walk names (lowercase, _base suffix)
+        for prefix, ids in [("co", _CO_IDS), ("fl", _FL_IDS)]:
             for sid in ids:
-                files.append(f"{prefix}{sid}.dat")
-                files.append(f"{prefix}{sid}.hea")
-        # A few subjects have supplemental segment files
-        for extra in ["CO028_n.dat", "CO029_n.dat", "CO038_2.dat"]:
-            files.append(extra)
+                files.append(f"LabWalks/{prefix}{sid}_base.dat")
+                files.append(f"LabWalks/{prefix}{sid}_base.hea")
+
+        if include_3day:
+            for prefix, ids in [("CO", _CO_IDS), ("FL", _FL_IDS)]:
+                for sid in ids:
+                    files.append(f"{prefix}{sid}.dat")
+                    files.append(f"{prefix}{sid}.hea")
+            for extra in ["CO028_n.dat", "CO029_n.dat", "CO038_2.dat"]:
+                files.append(extra)
 
     return files
 
