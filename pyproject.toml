@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68.0", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "posturisk"
+version = "0.1.0"
+description = "Classifying fallers vs non-fallers from posturography/accelerometer data using traditional ML with SHAP explainability."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "posturisk contributors"},
+]
+
+dependencies = [
+    "scikit-learn>=1.4",
+    "pandas>=2.1",
+    "numpy>=1.26",
+    "matplotlib>=3.8",
+    "scipy>=1.12",
+    # Data loading helpers
+    "openpyxl>=3.1",      # read .xlsx clinical metadata
+    "requests>=2.31",     # download files from PhysioNet
+    "tqdm>=4.66",         # progress bars for downloads
+]
+
+[project.optional-dependencies]
+full = [
+    "shap>=0.45",         # SHAP explainability (requires numba/llvmlite)
+    "wfdb>=4.1",          # read PhysioNet MIT-format signals (requires aiohttp)
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.3",
+    "mypy>=1.8",
+    "pre-commit>=3.6",
+]
+notebooks = [
+    "jupyterlab>=4.1",
+    "ipywidgets>=8.1",
+]
+
+[project.scripts]
+posturisk-fetch = "posturisk.fetch_data:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 99
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
