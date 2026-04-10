@@ -106,15 +106,23 @@ pytest
 
 ## 🔬 Pipeline Overview
 
-1. **Data acquisition** — `fetch_data.py` pulls the LTMM dataset from
-   PhysioNet.
-2. **Feature engineering** — Extract gait features (stride time, step
-   regularity, RMS acceleration, frequency-domain metrics) from raw
-   accelerometer windows.
-3. **Modelling** — Train and compare Random Forest, Gradient Boosting, SVM,
-   and Logistic Regression with nested cross-validation.
-4. **Explainability** — Generate SHAP summary plots, dependence plots, and
-   per-subject force plots to interpret model decisions.
+The project is structured incrementally natively through modular `.py` scripts and Jupyter Notebooks natively aligned exactly to each stage:
+
+1. **Stage 1: Data Acquisition (`fetch_data.py`)** 
+   * Pulls the LTMM dataset from PhysioNet. Uses local Python execution parsing `RECORDS` to download `.dat`/`.hea` waveform components plus clinical meta-files.
+2. **Stage 2 & 3: Preprocessing & Feature Engineering (`preprocess.py`, `features.py`)** 
+   * A custom, dependency-free WFDB (`.hea` and `.dat`) parser extracts raw 16-bit physical signals.
+   * Cleans clinical metadata (median imputations and missing logic drops). 
+   * Engineers **129** distinct gait features (jerk profiles, spectral bandwidth distribution, and postural sway planar approximations).
+   * Runs natively using `python -m posturisk.preprocess`.
+3. **Stage 4: Modelling (Pending)** 
+   * Train and compare Random Forest, Gradient Boosting, SVM, and Logistic Regression with nested cross-validation.
+4. **Stage 5: Explainability (Pending)** 
+   * Generate SHAP summary plots, dependence plots, and per-subject force plots to interpret model decisions.
+
+### 📓 Notebooks
+* `notebooks/01_eda.ipynb` — Explores the clinical demographics, visualizes the raw waveform signatures for Fallers vs. Non-Fallers.
+* `notebooks/02_features.ipynb` — Interactive visual deep dives into advanced feature correlations and engineered differences.
 
 ---
 
