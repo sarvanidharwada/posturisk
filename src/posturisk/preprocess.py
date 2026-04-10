@@ -27,8 +27,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
-from scipy import signal as scipy_signal
-from scipy.stats import kurtosis, skew
+
+from posturisk.features import extract_signal_features
 
 logger = logging.getLogger(__name__)
 
@@ -258,85 +258,7 @@ def load_clinical_data(raw_dir: Path = DEFAULT_RAW_DIR) -> pd.DataFrame:
 
 
 # ── Signal Feature Extraction ────────────────────────────────────────────────
-
-
-def _rms(x: NDArray) -> float:
-    """Root mean square of array *x*."""
-    return float(np.sqrt(np.mean(x**2)))
-
-
-def _dominant_freq(x: NDArray, fs: int) -> float:
-    """Dominant frequency (Hz) of signal *x* sampled at *fs* Hz."""
-    n = len(x)
-    freqs = np.fft.rfftfreq(n, d=1.0 / fs)
-    fft_mag = np.abs(np.fft.rfft(x))
-    # Ignore DC component
-    fft_mag[0] = 0
-    return float(freqs[np.argmax(fft_mag)])
-
-
-def _spectral_entropy(x: NDArray, fs: int) -> float:
-    """Normalised spectral entropy of signal *x*."""
-    freqs, psd = scipy_signal.welch(x, fs=fs, nperseg=min(256, len(x)))
-    psd = psd / (psd.sum() + 1e-12)
-    entropy = -np.sum(psd * np.log2(psd + 1e-12))
-    max_entropy = np.log2(len(psd))
-    return float(entropy / max_entropy) if max_entropy > 0 else 0.0
-
-
-def extract_signal_features(
-    signals: NDArray[np.float64],
-    fs: int = 100,
-    signal_names: list[str] | None = None,
-) -> dict[str, float]:
-    """Extract time- and frequency-domain features from multi-channel signals.
-
-    Parameters
-    ----------
-    signals : NDArray
-        Shape ``(n_samples, n_signals)`` array of physical-unit signals.
-    fs : int
-        Sample rate in Hz.
-    signal_names : list[str] | None
-        Names for each signal channel.  Defaults to ``SIGNAL_NAMES``.
-
-    Returns
-    -------
-    dict[str, float]
-        Feature name → value dictionary.
-    """
-    if signal_names is None:
-        signal_names = SIGNAL_NAMES[: signals.shape[1]]
-
-    features: dict[str, float] = {}
-
-    for i, name in enumerate(signal_names):
-        x = signals[:, i]
-
-        # Time-domain features
-        features[f"{name}_mean"] = float(np.mean(x))
-        features[f"{name}_std"] = float(np.std(x))
-        features[f"{name}_rms"] = _rms(x)
-        features[f"{name}_min"] = float(np.min(x))
-        features[f"{name}_max"] = float(np.max(x))
-        features[f"{name}_range"] = float(np.ptp(x))
-        features[f"{name}_skew"] = float(skew(x))
-        features[f"{name}_kurtosis"] = float(kurtosis(x))
-        features[f"{name}_iqr"] = float(np.percentile(x, 75) - np.percentile(x, 25))
-
-        # Frequency-domain features
-        features[f"{name}_dom_freq"] = _dominant_freq(x, fs)
-        features[f"{name}_spectral_entropy"] = _spectral_entropy(x, fs)
-
-    # Cross-channel features
-    if signals.shape[1] >= 3:
-        # Total acceleration magnitude
-        acc_mag = np.sqrt(np.sum(signals[:, :3] ** 2, axis=1))
-        features["acc_magnitude_mean"] = float(np.mean(acc_mag))
-        features["acc_magnitude_std"] = float(np.std(acc_mag))
-        features["acc_magnitude_rms"] = _rms(acc_mag)
-
-    return features
+# Moved to src/posturisk/features.py
 
 
 # ── Subject-Level Pipeline ────────────────────────────────────────────────────

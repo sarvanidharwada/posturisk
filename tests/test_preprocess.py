@@ -10,9 +10,7 @@ import pytest
 from posturisk.preprocess import (
     SIGNAL_NAMES,
     WFDBHeader,
-    _rms,
     _subject_id_from_record,
-    extract_signal_features,
     load_clinical_data,
     merge_and_clean,
     parse_hea,
@@ -140,51 +138,6 @@ class TestReadWfdbSignal:
 
         # Expected: (150-50)/100=1.0, (250-50)/100=2.0, (50-50)/100=0.0
         np.testing.assert_allclose(signals[:, 0], [1.0, 2.0, 0.0])
-
-
-# ── Tests: Feature Extraction ────────────────────────────────────────────────
-
-
-class TestExtractSignalFeatures:
-    """Tests for extract_signal_features()."""
-
-    def test_returns_dict(self):
-        rng = np.random.default_rng(0)
-        signals = rng.standard_normal((1000, 3))
-        features = extract_signal_features(signals, fs=100, signal_names=["a", "b", "c"])
-        assert isinstance(features, dict)
-
-    def test_feature_count(self):
-        rng = np.random.default_rng(0)
-        signals = rng.standard_normal((1000, 6))
-        features = extract_signal_features(signals, fs=100)
-        # 11 features per signal × 6 signals + 3 cross-channel = 69
-        assert len(features) == 69
-
-    def test_feature_names_prefix(self):
-        signals = np.random.default_rng(0).standard_normal((500, 2))
-        features = extract_signal_features(signals, fs=100, signal_names=["x", "y"])
-        assert "x_mean" in features
-        assert "x_std" in features
-        assert "y_rms" in features
-        assert "y_dom_freq" in features
-
-    def test_no_nan_features(self):
-        signals = np.random.default_rng(0).standard_normal((500, 3))
-        features = extract_signal_features(signals, fs=100, signal_names=["a", "b", "c"])
-        for name, val in features.items():
-            assert np.isfinite(val), f"Non-finite value for feature '{name}': {val}"
-
-
-class TestRms:
-    """Tests for _rms()."""
-
-    def test_known_value(self):
-        x = np.array([1.0, -1.0, 1.0, -1.0])
-        assert _rms(x) == pytest.approx(1.0)
-
-    def test_zeros(self):
-        assert _rms(np.zeros(100)) == pytest.approx(0.0)
 
 
 # ── Tests: Clinical Data Loading ─────────────────────────────────────────────
