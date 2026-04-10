@@ -119,8 +119,11 @@ The project is structured incrementally natively through modular `.py` scripts a
    * Tunes and compares Random Forest and Support Vector Machine (RBF kernel) utilizing `RepeatedStratifiedKFold` cross-validation (5 splits, 3 repeats).
    * Validates generalized metrics on a small sample size ($n=73$) avoiding leakage, outputting rigorous Sensitivity, Specificity, Accuracy, F1, and AUC metrics.
    * Auto-pickles the champion model framework to `models/best_model.pkl`.
-4. **Stage 5: Explainability (Pending)** 
-   * Generate SHAP summary plots, dependence plots, and per-subject force plots to interpret model decisions.
+4. **Stage 5: Explainability (`explain.py`)** 
+   * Deconstructs Random Forest probability paths using `treeinterpreter` (A pure-python module mathematically identical to TreeSHAP without MSVC compiler constraints).
+   * Generates global Absolute Feature Importance rankings.
+   * Generates Surrogate Beeswarm plots correlating isolated mechanical features (like `sway_path_length` or `v_acc` high-frequency turbulences) directly to shifting patient risk.
+   * Provides individual Force Plots detailing precise feature attributions for False Negatives vs True Positives.
 
 ### 📓 Notebooks
 * `notebooks/01_eda.ipynb` — Explores the clinical demographics, visualizes the raw waveform signatures for Fallers vs. Non-Fallers.
